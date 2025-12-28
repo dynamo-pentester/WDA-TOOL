@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Start Session - WLAV</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('/frontend/static/images/loginbg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    .navbar h1 {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .navbar img {
+      height: 55px;
+    }
+
+    /* LOGIN CARD */
+    .container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      padding: 30px 25px;
+      width: 90%;
+      max-width: 350px;
+      color: #fff;
+    }
+
+    .login-card h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    input::placeholder, select, label {
+      color: #f0f0f0;
+    }
+
+    button {
+      background-color: rgba(0, 123, 255, 0.7);
+      font-weight: bold;
+      transition: background-color 0.3s;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: rgba(0, 123, 255, 0.9);
+    }
+
+    .toast {
+      background: #28a745;
+      color: white;
+      padding: 10px;
+      margin-top: 10px;
+      text-align: center;
+      border-radius: 4px;
+      display: none;
+      transition: all 0.3s ease;
+    }
+
+    #dateSection {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <h1>WDATOOL</h1>
+    <img src="/frontend/static/images/oglogo-removebg-preview.png" alt="Company Logo">
+  </div>
+
+  <!-- Login Container -->
+  <div class="container">
+    <div class="login-card">
+      <h2>Start Session</h2>
+      <input type="text" id="employee" placeholder="Enter your name" required />
+      <input type="text" id="case_no" placeholder="Enter case number" required />
+      <button onclick="checkUploads()">Continue</button>
+
+      <div id="dateSection">
+        <label for="dateSelect">Select upload date or create new:</label>
+        <select id="dateSelect"></select>
+        <button onclick="startSession()">Start Session</button>
+      </div>
+
+      <div id="toast" class="toast"></div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    function getToday() {
+      const now = new Date();
+      return now.toISOString().split("T")[0];
+    }
+
+    async function checkUploads() {
+      const employee = document.getElementById("employee").value.trim();
+      const caseNo = document.getElementById("case_no").value.trim();
+      const dateSelect = document.getElementById("dateSelect");
+
+      if (!employee || !caseNo) {
+        alert("Please enter both name and case number.");
+        return;
+      }
+
+      localStorage.setItem("employee", employee);
+      localStorage.setItem("case_no", caseNo);
+
+      try {
+        const res = await fetch(`/list_dates?employee=${employee}&case_no=${caseNo}`);
+        const data = await res.json();
+        const dates = data.dates || [];
+        const today = getToday();
+
+        document.getElementById("dateSection").style.display = "block";
+        dateSelect.innerHTML = "";
+
+        if (dates.length > 0) {
+          dates.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d;
+            opt.textContent = d;
+            dateSelect.appendChild(opt);
+          });
+
+          const newOpt = document.createElement("option");
+          newOpt.value = today;
+          newOpt.textContent = `➕ Create New Upload for Today (${today})`;
+          dateSelect.appendChild(newOpt);
+
+          localStorage.setItem("is_new_user", "false");
+          showToast(`Welcome back, ${employee}!`);
+        } else {
+          localStorage.setItem("date", today);
+          localStorage.setItem("is_new_user", "true");
+          showToast(`Welcome to ALE's WLAV Tool, ${employee}!`);
+          setTimeout(() => window.location.href = "index.html", 1500);
+        }
+
+      } catch (err) {
+        console.error("Error checking uploads:", err);
+        alert("Something went wrong.");
+      }
+    }
+
+    function startSession() {
+      const selectedDate = document.getElementById("dateSelect").value;
+      localStorage.setItem("date", selectedDate);
+      window.location.href = "index.html";
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.style.display = "block";
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 1600);
+    }
+  </script>
+</body>
+</html>

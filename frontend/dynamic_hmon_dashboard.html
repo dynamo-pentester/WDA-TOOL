@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 HMON Monitoring Dashboard</title>
+    <link rel="stylesheet" href="/frontend/static/css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+    <!-- Animated Background -->
+     
+    <div class="background-container">
+        <div class="gradient-bg"></div>
+        <div class="particles-container">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
+
+    <!-- Loading Animation -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Initializing HMON Dashboard...</div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard-container" id="dashboardContainer">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1 class="dashboard-title">
+                    <span class="title-icon">📊</span>
+                    HMON Monitoring Dashboard
+                    <div class="status-indicator"></div>
+                </h1>
+                <div class="dashboard-subtitle">Advanced Hardware Monitoring & Analysis</div>
+            </div>
+            <div class="header-actions">
+                <div class="real-time-clock" id="realTimeClock"></div>
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    Connected
+                </div>
+            </div>
+        </header>
+
+        <!-- Control Panel -->
+        <section class="control-panel" id="controlPanel">
+            <div class="control-header">
+                <h3>Control Panel</h3>
+                <div class="control-status" id="controlStatus">Select parameters to analyze</div>
+            </div>
+            <div class="controls-grid" id="selectors">
+                <div class="control-group">
+                    <label class="control-label">Employee</label>
+                    <div class="select-wrapper">
+                        <select id="emp" class="control-select">
+                            <option value="">Select Employee...</option>
+                        </select>
+                        <div class="select-indicator"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Case #</label>
+                    <div class="select-wrapper">
+                        <select id="case" class="control-select" disabled>
+                            <option value="">Select Case...</option>
+                        </select>
+                        <div class="select-indicator"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Date</label>
+                    <div class="select-wrapper">
+                        <select id="date" class="control-select" disabled>
+                            <option value="">Select Date...</option>
+                        </select>
+                        <div class="select-indicator"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Folder</label>
+                    <div class="select-wrapper">
+                        <select id="folder" class="control-select" disabled>
+                            <option value="">Select Folder...</option>
+                        </select>
+                        <div class="select-indicator"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">CSV File</label>
+                    <div class="select-wrapper">
+                        <select id="csv" class="control-select" disabled>
+                            <option value="">Select CSV...</option>
+                        </select>
+                        <div class="select-indicator"></div>
+                    </div>
+                </div>
+                <div class="control-group action-group">
+                    <button id="analyseBtn" class="analyze-btn" disabled>
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">Analyze</span>
+                        <div class="btn-loader"></div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Metrics Section -->
+        <section class="metrics-section" id="metricsSection">
+            <div class="metrics-header">
+                <h3>System Metrics</h3>
+                <div class="metrics-timestamp" id="metricsTimestamp">Last updated: --</div>
+            </div>
+            <div class="metrics-grid" id="metrics">
+                <!-- Metrics will be dynamically populated -->
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section" id="chartsSection">
+            <div class="section-header">
+                <h3>Data Visualization</h3>
+                <div class="section-controls">
+                    <button class="refresh-btn" id="refreshCharts">
+                        <span class="refresh-icon">🔄</span>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="charts-grid" id="plots">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4 class="chart-title">
+                            <span class="chart-icon">📈</span>
+                            System Overview
+                        </h4>
+                        <div class="chart-status">Ready</div>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-placeholder" id="overviewPlaceholder">
+                            <div class="placeholder-icon">📊</div>
+                            <div class="placeholder-text">Click Analyze to view system overview</div>
+                        </div>
+                        <div id="overview" class="plotly-chart"></div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h4 class="chart-title">
+                            <span class="chart-icon">🌀</span>
+                            Fan Monitoring
+                        </h4>
+                        <div class="chart-status">Ready</div>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-placeholder" id="fansPlaceholder">
+                            <div class="placeholder-icon">🌀</div>
+                            <div class="placeholder-text">Click Analyze to view fan monitoring</div>
+                        </div>
+                        <div id="fans" class="plotly-chart"></div>
+                    </div>
+                </div>
+
+                <div class="chart-container full-width">
+                    <div class="chart-header">
+                        <h4 class="chart-title">
+                            <span class="chart-icon">💾</span>
+                            Memory Analysis
+                        </h4>
+                        <div class="chart-status">Ready</div>
+                    </div>
+                    <div class="chart-content">
+                        <div class="chart-placeholder" id="memoryPlaceholder">
+                            <div class="placeholder-icon">💾</div>
+                            <div class="placeholder-text">Click Analyze to view memory analysis</div>
+                        </div>
+                        <div id="memory" class="plotly-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <span>HMON Dashboard v2.1</span>
+                    <span class="separator">•</span>
+                    <span>Hardware Monitoring System</span>
+                </div>
+                <div class="footer-status">
+                    <div class="system-status">System Operational</div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/frontend/static/js/app.js"></script>
+</body>
+</html>

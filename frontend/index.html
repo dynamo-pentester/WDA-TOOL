@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 WLAV Tool</title>
+    <style>
+        :root {
+            --nav-h: 56px;
+            --sidebar-w: clamp(280px, 20vw, 320px);
+            --gap: 0.75rem;
+            --bg: #0a0a0a;
+            --fg: #e5e5e5;
+            --accent: #1a1a1a;
+            --panel: #141414;
+            --border: #333;
+            --hover: #252525;
+            --primary: #00ff88;
+            --primary-hover: #00cc6a;
+            --secondary: #333;
+            --text-muted: #888;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --error: #ff4444;
+            --success: #00ff88;
+            --warning: #ffaa00;
+        }
+
+        body.light {
+            --bg: #ffffff;
+            --fg: #1a1a1a;
+            --accent: #f8f9fa;
+            --panel: #f5f5f5;
+            --border: #e0e0e0;
+            --hover: #f0f0f0;
+            --primary: #007bff;
+            --primary-hover: #0056b3;
+            --secondary: #6c757d;
+            --text-muted: #6c757d;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: clamp(13px, 0.8vw + 10px, 15px);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Professional Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-h);
+            background: var(--accent);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .top-bar .welcome {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .top-bar .actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .top-bar .actions button {
+            background: var(--secondary);
+            color: var(--fg);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .top-bar .actions button:hover {
+            background: var(--primary);
+            color: var(--bg);
+            transform: translateY(-1px);
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            position: fixed;
+            left: 1rem;
+            top: calc(var(--nav-h) + 1rem);
+            z-index: 1001;
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 8px var(--shadow);
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        /* Professional Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--nav-h);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-w);
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 1.25rem;
+            overflow-y: auto;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            box-shadow: 3px 0 10px var(--shadow);
+        }
+
+        .sidebar.hide {
+            transform: translateX(-100%);
+        }
+
+        /* Main Content Area */
+        .main-container {
+            margin-left: var(--sidebar-w);
+            padding: calc(var(--nav-h) + 1.5rem) 1.5rem 1.5rem;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+        }
+
+        .main-container.sidebar-hidden {
+            margin-left: 0;
+        }
+
+        /* Form Sections */
+        .form-section {
+            background: var(--accent);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: var(--fg);
+            font-size: 0.85rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--fg);
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+        }
+
+        .form-group input[type="file"] {
+            padding: 0.6rem;
+            border: 2px dashed var(--border);
+            cursor: pointer;
+        }
+
+        .form-group input[type="file"]:hover {
+            border-color: var(--primary);
+        }
+
+        /* Professional Buttons */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn.primary {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        .btn.primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn.secondary {
+            background: var(--secondary);
+            color: var(--fg);
+            border: 1px solid var(--border);
+        }
+
+        .btn.secondary:hover {
+            background: var(--hover);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .btn-group .btn {
+            margin-top: 0;
+        }
+
+        /* Professional Stats Bar */
+        .stats-bar {
+            background: var(--accent);
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem 1rem;
+            flex: 1 1 clamp(100px, 15vw, 180px);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Professional Table */
+        .table-container {
+            background: var(--panel);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 3px 10px var(--shadow);
+        }
+
+        .table-header {
+            background: var(--accent);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            color: var(--fg);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .table-actions .btn {
+            width: auto;
+            padding: 0.5rem 1rem;
+            margin-top: 0;
+            font-size: 0.8rem;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: 65vh;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .log-table th,
+        .log-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .log-table th {
+            background: var(--accent);
+            font-weight: 600;
+            color: var(--fg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .log-table tr:hover {
+            background: var(--hover);
+        }
+
+        .log-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Professional Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+        }
+
+        .pagination select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            color: var(--fg);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin: 0 0.5rem;
+        }
+
+        .pagination button {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            color: var(--fg);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            min-width: 2.5rem;
+        }
+
+        .pagination button:hover {
+            background: var(--hover);
+        }
+
+        .pagination button.active {
+            background: var(--primary);
+            color: var(--bg);
+            border-color: var(--primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Panes Layout */
+        .panes {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .log-pane {
+            flex: 1;
+            min-height: 500px;
+        }
+
+        .log-pane.comparison {
+            border-left: 3px solid var(--primary);
+        }
+
+        /* Filter Pairs */
+        .filter-pairs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .pair {
+            display: flex;
+            gap: 0.5rem;
+            align-items: end;
+        }
+
+        .pair .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .pair .remove-btn {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            height: 2.75rem;
+        }
+
+        .pair .remove-btn:hover {
+            background: #cc0000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+                transform: translateX(-100%);
+            }
+
+            .main-container {
+                margin-left: 0;
+                padding: calc(var(--nav-h) + 1rem) 1rem 1rem;
+            }
+
+            .sidebar-toggle {
+                left: 1rem;
+                top: calc(var(--nav-h) + 1rem);
+            }
+
+            .top-bar {
+                padding: 0 1rem;
+            }
+
+            .top-bar .welcome {
+                font-size: 1rem;
+            }
+
+            .top-bar .actions {
+                gap: 0.25rem;
+            }
+
+            .top-bar .actions button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-start;
+            }
+
+            .table-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .panes {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .log-pane {
+                max-height: 400px;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .loading::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            margin: -9px 0 0 -9px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .text-success {
+            color: var(--success);
+        }
+
+        .text-error {
+            color: var(--error);
+        }
+
+        .text-warning {
+            color: var(--warning);
+        }
+
+        /* Highlight styling */
+        mark {
+            background-color: #ffeb3b;
+            color: #000;
+            padding: 1px 3px;
+            border-radius: 2px;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--panel);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Professional Top Bar -->
+    <div class="top-bar">
+        <div class="welcome">
+            <span>🔧</span>
+            <span id="welcomeText">Log Analysis Tool</span>
+        </div>
+        <div class="actions">
+            <button id="cleanupBtn">🗑️ Cleanup</button>
+            <button id="btn-hmon">HMON Visualizer</button>
+            <button id="switchUserBtn">👤 Switch User</button>
+            <button id="themeToggle">🌓 Theme</button>
+        </div>
+    </div>
+
+    <!-- Sidebar Toggle -->
+    <button class="sidebar-toggle" id="sidebarBtn">☰</button>
+
+    <!-- Professional Sidebar -->
+    <div class="sidebar" id="sidePanel">
+        <!-- Primary Log Controls -->
+        <div class="form-section">
+            <h3>Primary Log Controls</h3>
+            <div class="form-group">
+                <label for="dateSelect">Date:</label>
+                <select id="dateSelect"></select>
+            </div>
+            <div class="form-group">
+                <label for="uploadFolderSelect">Upload Folder:</label>
+                <select id="uploadFolderSelect"></select>
+            </div>
+            <div class="form-group">
+                <label for="fileUpload">Upload File:</label>
+                <input type="file" id="fileUpload" accept=".tar" />
+            </div>
+            <button class="btn primary" id="uploadBtn">📤 Upload</button>
+        </div>
+
+        <!-- Log Selection -->
+        <div class="form-section">
+            <h3>Log Selection</h3>
+            <div class="form-group">
+                <label for="chassisSelect">Chassis:</label>
+                <select id="chassisSelect">
+                    <option value="">Select Chassis</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="logFileSelect">Log File:</label>
+                <select id="logFileSelect">
+                    <option value="">Select Log File</option>
+                </select>
+            </div>
+            <button class="btn primary" id="loadLogBtn">📂 Load Primary Log</button>
+        </div>
+
+        <!-- Filtering -->
+        <div class="form-section">
+            <h3>Filtering</h3>
+            <div class="form-group">
+                <label for="moduleSelect">Module:</label>
+                <select id="moduleSelect">
+                    <option value="">ALL MODULES</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="keywordInput">Keyword:</label>
+                <input type="text" id="keywordInput" placeholder="Enter keyword..." />
+            </div>
+            <div class="btn-group">
+                <button class="btn secondary" id="addFilterBtn">➕ Add Filter</button>
+                <button class="btn secondary" id="resetFiltersBtn">🔄 Reset All</button>
+            </div>
+            <div class="filter-pairs" id="filterPairs"></div>
+        </div>
+
+        <!-- Comparison Mode -->
+        <div class="form-section">
+            <h3>Comparison Mode</h3>
+            <button class="btn primary" id="comparisonToggle">⚖️ Start Comparison</button>
+        </div>
+
+        <!-- Comparison Controls (Hidden by default) -->
+        <div class="form-section hidden" id="comparisonControls">
+            <h3>Comparison Log Controls</h3>
+            <div class="form-group">
+                <label for="compDateSelect">Date:</label>
+                <select id="compDateSelect"></select>
+            </div>
+            <div class="form-group">
+                <label for="compUploadFolderSelect">Folder:</label>
+                <select id="compUploadFolderSelect"></select>
+            </div>
+            <div class="form-group">
+                <label for="compFileUpload">Upload File:</label>
+                <input type="file" id="compFileUpload" accept=".tar" />
+            </div>
+            <button class="btn primary" id="compUploadBtn">📤 Upload</button>
+            <div class="form-group">
+                <label for="compChassisSelect">Chassis:</label>
+                <select id="compChassisSelect">
+                    <option value="">Select Chassis</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="compLogFileSelect">Log File:</label>
+                <select id="compLogFileSelect">
+                    <option value="">Select Log File</option>
+                </select>
+            </div>
+            <button class="btn primary" id="compLoadLogBtn">📂 Load Comparison Log</button>
+            <div class="form-group">
+                <label for="compModuleSelect">Module:</label>
+                <select id="compModuleSelect">
+                    <option value="">ALL MODULES</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="compKeywordInput">Keyword:</label>
+                <input type="text" id="compKeywordInput" placeholder="Enter keyword..." />
+            </div>
+            <div class="btn-group">
+                <button class="btn secondary" id="compAddFilterBtn">➕ Add Filter</button>
+                <button class="btn secondary" id="compResetFiltersBtn">🔄 Reset All</button>
+            </div>
+            <div class="filter-pairs" id="compFilterPairs"></div>
+            <button class="btn secondary" id="removeComparisonBtn">❌ Remove Comparison</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container" id="mainContainer">
+        <!-- Professional Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">Total Logs</span>
+                <span class="stat-value" id="totalLogs">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Filtered</span>
+                <span class="stat-value" id="filteredLogs">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Current Page</span>
+                <span class="stat-value" id="currentPage">1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total Pages</span>
+                <span class="stat-value" id="totalPages">1</span>
+            </div>
+        </div>
+
+        <!-- Log Output Area -->
+        <div class="panes" id="logOutput">
+            <!-- Primary Log View -->
+            <div class="log-pane" id="primaryPane">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2 id="primaryTitle">Primary Log View</h2>
+                        <div class="table-actions">
+                            <button class="btn secondary" id="exportBtn">📥 Export</button>
+                            <button class="btn secondary" id="refreshBtn">🔄 Refresh</button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="log-table" id="primaryTable">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Switch</th>
+                                    <th>Module</th>
+                                    <th>Message</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody id="primaryTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No logs loaded</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Log View (Hidden by default) -->
+            <div class="log-pane comparison hidden" id="comparisonPane">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2 id="comparisonTitle">Comparison Log View</h2>
+                        <div class="table-actions">
+                            <button class="btn secondary" id="compExportBtn">📥 Export</button>
+                            <button class="btn secondary" id="compRefreshBtn">🔄 Refresh</button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="log-table" id="comparisonTable">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Switch</th>
+                                    <th>Module</th>
+                                    <th>Message</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparisonTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No comparison logs loaded</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Pagination with Dropdown -->
+        <div class="pagination" id="paginationControls">
+            <button id="prevPageBtn">‹ Previous</button>
+            <span>Page</span>
+            <select id="pageSelect">
+                <option value="1">1</option>
+            </select>
+            <span>of <span id="totalPageSpan">1</span></span>
+            <button id="nextPageBtn">Next ›</button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables - 500 entries per page
+        let currentPage = 1;
+        let totalPages = 1;
+        let itemsPerPage = 500;
+        let allLogs = [];
+        let filteredLogs = [];
+        let comparisonLogs = [];
+        let comparisonFilteredLogs = [];
+        let comparisonMode = false;
+        let comparisonFolder = '';
+        let comparisonDate = '';
+
+        // Get user data from localStorage
+        const employee = localStorage.getItem('employee') || 'User';
+        const caseNo = localStorage.getItem('case_no') || 'Unknown';
+        const currentDate = localStorage.getItem('date') || new Date().toISOString().split('T')[0];
+
+        // Natural sort function
+        function naturalSort(a, b) {
+            const ax = [], bx = [];
+            a.replace(/(\d+)|(\D+)/g, (_, $1, $2) => ax.push([$1 || Infinity, $2 || ""]));
+            b.replace(/(\d+)|(\D+)/g, (_, $1, $2) => bx.push([$1 || Infinity, $2 || ""]));
+            while (ax.length && bx.length) {
+                const an = ax.shift();
+                const bn = bx.shift();
+                const result = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+                if (result !== 0) return result;
+            }
+            return ax.length - bx.length;
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Set welcome text
+            document.getElementById('welcomeText').textContent = `${employee} - Case: ${caseNo}`;
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light');
+            }
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Load initial data
+            loadDates();
+            loadComparisonDates();
+        }
+
+        function setupEventListeners() {
+            // Sidebar toggle
+            document.getElementById('sidebarBtn').addEventListener('click', toggleSidebar);
+
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+            // Cleanup and switch user
+            document.getElementById('cleanupBtn').addEventListener('click', cleanupLogs);
+            document.getElementById('switchUserBtn').addEventListener('click', switchUser);
+
+            // Upload functionality
+            document.getElementById('uploadBtn').addEventListener('click', uploadFile);
+            document.getElementById('compUploadBtn').addEventListener('click', uploadComparisonFile);
+
+            // Log loading
+            document.getElementById('loadLogBtn').addEventListener('click', loadPrimaryLog);
+            document.getElementById('compLoadLogBtn').addEventListener('click', loadComparisonLog);
+
+            // Comparison mode
+            document.getElementById('comparisonToggle').addEventListener('click', toggleComparisonMode);
+            document.getElementById('removeComparisonBtn').addEventListener('click', removeComparison);
+
+            // Filtering
+            document.getElementById('addFilterBtn').addEventListener('click', addFilter);
+            document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
+            document.getElementById('compAddFilterBtn').addEventListener('click', addComparisonFilter);
+            document.getElementById('compResetFiltersBtn').addEventListener('click', resetComparisonFilters);
+
+            // Live filtering with syncing
+            document.getElementById('moduleSelect').addEventListener('change', () => {
+                applyFilters();
+                syncFiltersToComparison();
+            });
+            document.getElementById('keywordInput').addEventListener('input', () => {
+                applyFilters();
+                syncFiltersToComparison();
+            });
+            document.getElementById('compModuleSelect').addEventListener('change', applyComparisonFilters);
+            document.getElementById('compKeywordInput').addEventListener('input', applyComparisonFilters);
+
+            // Chassis and date changes
+            document.getElementById('chassisSelect').addEventListener('change', loadLogFiles);
+            document.getElementById('compChassisSelect').addEventListener('change', loadComparisonLogFiles);
+            document.getElementById('dateSelect').addEventListener('change', handleDateChange);
+            document.getElementById('compDateSelect').addEventListener('change', handleComparisonDateChange);
+            document.getElementById('uploadFolderSelect').addEventListener('change', loadChassis);
+            document.getElementById('compUploadFolderSelect').addEventListener('change', loadComparisonChassis);
+
+            // Export and refresh
+            document.getElementById('exportBtn').addEventListener('click', exportLogs);
+            document.getElementById('refreshBtn').addEventListener('click', refreshTable);
+            document.getElementById('compExportBtn').addEventListener('click', exportComparisonLogs);
+            document.getElementById('compRefreshBtn').addEventListener('click', refreshComparisonTable);
+
+            // Pagination event listeners
+            document.getElementById('pageSelect').addEventListener('change', function () {
+                currentPage = parseInt(this.value);
+                updatePrimaryTable();
+                updateComparisonTable();
+                updateStats();
+                updatePagination();
+            });
+
+            document.getElementById('prevPageBtn').addEventListener('click', function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    document.getElementById('pageSelect').value = currentPage;
+                    updatePrimaryTable();
+                    updateComparisonTable();
+                    updateStats();
+                    updatePagination();
+                }
+            });
+
+            document.getElementById('nextPageBtn').addEventListener('click', function () {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    document.getElementById('pageSelect').value = currentPage;
+                    updatePrimaryTable();
+                    updateComparisonTable();
+                    updateStats();
+                    updatePagination();
+                }
+            });
+
+            // Event delegation for dynamic filter pairs
+            document.getElementById('filterPairs').addEventListener('input', () => {
+                applyFilters();
+                syncFiltersToComparison();
+            });
+            document.getElementById('filterPairs').addEventListener('change', () => {
+                applyFilters();
+                syncFiltersToComparison();
+            });
+            document.getElementById('compFilterPairs').addEventListener('input', applyComparisonFilters);
+            document.getElementById('compFilterPairs').addEventListener('change', applyComparisonFilters);
+        }
+
+        // UI Functions
+        function toggleSidebar() {
+            document.getElementById('sidePanel').classList.toggle('hide');
+            document.getElementById('mainContainer').classList.toggle('sidebar-hidden');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            const isLight = document.body.classList.contains('light');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+
+        function toggleComparisonMode() {
+            comparisonMode = !comparisonMode;
+            const toggle = document.getElementById('comparisonToggle');
+            const controls = document.getElementById('comparisonControls');
+            const pane = document.getElementById('comparisonPane');
+
+            if (comparisonMode) {
+                toggle.textContent = '❌ Exit Comparison';
+                toggle.classList.remove('primary');
+                toggle.classList.add('secondary');
+                controls.classList.remove('hidden');
+                pane.classList.remove('hidden');
+                syncFiltersToComparison();
+            } else {
+                toggle.textContent = '⚖️ Start Comparison';
+                toggle.classList.add('primary');
+                toggle.classList.remove('secondary');
+                controls.classList.add('hidden');
+                pane.classList.add('hidden');
+            }
+        }
+
+        function removeComparison() {
+            comparisonMode = false;
+            comparisonLogs = [];
+            comparisonFilteredLogs = [];
+
+            document.getElementById('comparisonToggle').textContent = '⚖️ Start Comparison';
+            document.getElementById('comparisonToggle').classList.add('primary');
+            document.getElementById('comparisonToggle').classList.remove('secondary');
+            document.getElementById('comparisonControls').classList.add('hidden');
+            document.getElementById('comparisonPane').classList.add('hidden');
+
+            // Clear comparison table and filters
+            updateComparisonTable();
+            document.getElementById('compFilterPairs').innerHTML = '';
+        }
+
+        // Filter syncing function
+        function syncFiltersToComparison() {
+            if (!comparisonMode) return;
+
+            // Sync main module and keyword
+            const primaryModule = document.getElementById('moduleSelect').value;
+            const primaryKeyword = document.getElementById('keywordInput').value;
+
+            document.getElementById('compModuleSelect').value = primaryModule;
+            document.getElementById('compKeywordInput').value = primaryKeyword;
+
+            // Sync additional filter pairs
+            const primaryPairs = document.querySelectorAll('#filterPairs .pair');
+            const comparisonContainer = document.getElementById('compFilterPairs');
+
+            // Clear existing comparison filter pairs
+            comparisonContainer.innerHTML = '';
+
+            // Recreate all filter pairs in comparison
+            primaryPairs.forEach(pair => {
+                const moduleValue = pair.querySelector('select').value;
+                const keywordValue = pair.querySelector('input').value;
+
+                if (moduleValue || keywordValue) {
+                    const newPair = document.createElement('div');
+                    newPair.className = 'pair';
+
+                    const moduleOptions = [...document.getElementById('compModuleSelect').options]
+                        .map(opt => `<option value="${opt.value}" ${opt.value === moduleValue ? 'selected' : ''}>${opt.textContent}</option>`)
+                        .join('');
+
+                    newPair.innerHTML = `
+                        <div class="form-group">
+                            <label>Module:</label>
+                            <select>${moduleOptions}</select>
+                        </div>
+                        <div class="form-group">
+                            <label>Keyword:</label>
+                            <input type="text" value="${keywordValue}" placeholder="Enter keyword..." />
+                        </div>
+                        <button class="remove-btn" onclick="removeComparisonFilter(this)">❌</button>
+                    `;
+
+                    comparisonContainer.appendChild(newPair);
+                }
+            });
+
+            // Apply filters to comparison if logs are loaded
+            if (comparisonLogs.length > 0) {
+                applyComparisonFilters();
+            }
+        }
+
+        // Data Loading Functions
+        async function loadDates() {
+            try {
+                const response = await fetch(`/list_dates?employee=${employee}&case_no=${caseNo}`);
+                const data = await response.json();
+
+                const select = document.getElementById('dateSelect');
+                select.innerHTML = '';
+
+                data.dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    if (date === currentDate) option.selected = true;
+                    select.appendChild(option);
+                });
+
+                // Trigger initial load
+                handleDateChange();
+            } catch (error) {
+                console.error('Error loading dates:', error);
+            }
+        }
+
+        async function loadComparisonDates() {
+            try {
+                const response = await fetch(`/list_dates?employee=${employee}&case_no=${caseNo}`);
+                const data = await response.json();
+
+                const select = document.getElementById('compDateSelect');
+                select.innerHTML = '';
+
+                data.dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    if (date === currentDate) option.selected = true;
+                    select.appendChild(option);
+                });
+
+                // Trigger initial load
+                handleComparisonDateChange();
+            } catch (error) {
+                console.error('Error loading comparison dates:', error);
+            }
+        }
+
+        function handleDateChange() {
+            const date = document.getElementById('dateSelect').value;
+            loadUploadFolders(date);
+        }
+
+        function handleComparisonDateChange() {
+            const date = document.getElementById('compDateSelect').value;
+            comparisonDate = date;
+            loadComparisonUploadFolders(date);
+        }
+
+        async function loadUploadFolders(date) {
+            try {
+                const response = await fetch(`/list_uploads?employee=${employee}&case_no=${caseNo}&date=${date}`);
+                const data = await response.json();
+
+                const select = document.getElementById('uploadFolderSelect');
+                select.innerHTML = '<option value="">Select Upload Folder</option>';
+
+                data.uploads.sort(naturalSort).forEach((folder, index) => {
+                    const displayName = data.display_names?.[folder] || folder;
+                    const option = document.createElement('option');
+                    option.value = folder;
+                    option.textContent = displayName;
+                    select.appendChild(option);
+                });
+
+
+                // Auto-select first folder if available
+                if (data.uploads.length > 0) {
+                    select.value = data.uploads[0];
+                    loadChassis();
+                }
+            } catch (error) {
+                console.error('Error loading upload folders:', error);
+            }
+        }
+
+        async function loadComparisonUploadFolders(date) {
+            try {
+                const response = await fetch(`/list_uploads?employee=${employee}&case_no=${caseNo}&date=${date}`);
+                const data = await response.json();
+
+                const select = document.getElementById('compUploadFolderSelect');
+                select.innerHTML = '<option value="">Select Upload Folder</option>';
+
+                data.uploads.sort(naturalSort).forEach((folder, index) => {
+                    const displayName = data.display_names?.[folder] || folder;
+                    const option = document.createElement('option');
+                    option.value = folder;
+                    option.textContent = displayName;
+                    select.appendChild(option);
+                });
+
+
+                // Auto-select first folder if available
+                if (data.uploads.length > 0) {
+                    select.value = data.uploads[0];
+                    comparisonFolder = data.uploads[0];
+                    loadComparisonChassis();
+                }
+            } catch (error) {
+                console.error('Error loading comparison upload folders:', error);
+            }
+        }
+
+        async function loadChassis() {
+            const date = document.getElementById('dateSelect').value || currentDate;
+            const folder = document.getElementById('uploadFolderSelect').value;
+
+            if (!folder) return;
+
+            try {
+                const response = await fetch(`/list_chassis_jsons?employee=${employee}&case_no=${caseNo}&date=${date}&folder=${folder}`);
+                const data = await response.json();
+
+                const chassisSelect = document.getElementById('chassisSelect');
+                const logFileSelect = document.getElementById('logFileSelect');
+
+                chassisSelect.innerHTML = '<option value="">Select Chassis</option>';
+                logFileSelect.innerHTML = '<option value="">Select Log File</option>';
+
+                const grouped = data.grouped_files || {};
+                Object.keys(grouped).sort(naturalSort).forEach(chassis => {
+                    const option = document.createElement('option');
+                    option.value = chassis;
+                    option.textContent = chassis;
+                    chassisSelect.appendChild(option);
+                });
+
+                // Auto-select first chassis if available
+                if (Object.keys(grouped).length > 0) {
+                    const firstChassis = Object.keys(grouped).sort(naturalSort)[0];
+                    chassisSelect.value = firstChassis;
+                    loadLogFiles();
+                }
+            } catch (error) {
+                console.error('Error loading chassis:', error);
+            }
+        }
+
+        async function loadComparisonChassis() {
+            const date = comparisonDate || currentDate;
+            const folder = comparisonFolder;
+
+            if (!folder) return;
+
+            try {
+                const response = await fetch(`/list_chassis_jsons?employee=${employee}&case_no=${caseNo}&date=${date}&folder=${folder}`);
+                const data = await response.json();
+
+                const chassisSelect = document.getElementById('compChassisSelect');
+                const logFileSelect = document.getElementById('compLogFileSelect');
+
+                chassisSelect.innerHTML = '<option value="">Select Chassis</option>';
+                logFileSelect.innerHTML = '<option value="">Select Log File</option>';
+
+                const grouped = data.grouped_files || {};
+                Object.keys(grouped).sort(naturalSort).forEach(chassis => {
+                    const option = document.createElement('option');
+                    option.value = chassis;
+                    option.textContent = chassis;
+                    chassisSelect.appendChild(option);
+                });
+
+                // Auto-select first chassis if available
+                if (Object.keys(grouped).length > 0) {
+                    const firstChassis = Object.keys(grouped).sort(naturalSort)[0];
+                    chassisSelect.value = firstChassis;
+                    loadComparisonLogFiles();
+                }
+            } catch (error) {
+                console.error('Error loading comparison chassis:', error);
+            }
+        }
+
+        async function loadLogFiles() {
+            const date = document.getElementById('dateSelect').value || currentDate;
+            const folder = document.getElementById('uploadFolderSelect').value;
+            const chassis = document.getElementById('chassisSelect').value;
+
+            if (!folder || !chassis) return;
+
+            try {
+                const response = await fetch(`/list_chassis_jsons?employee=${employee}&case_no=${caseNo}&date=${date}&folder=${folder}`);
+                const data = await response.json();
+
+                const select = document.getElementById('logFileSelect');
+                select.innerHTML = '<option value="">Select Log File</option>';
+
+                const grouped = data.grouped_files || {};
+                if (grouped[chassis]) {
+                    grouped[chassis].sort(naturalSort).forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file;
+                        option.textContent = file;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading log files:', error);
+            }
+        }
+
+        async function loadComparisonLogFiles() {
+            const date = comparisonDate || currentDate;
+            const folder = comparisonFolder;
+            const chassis = document.getElementById('compChassisSelect').value;
+
+            if (!folder || !chassis) return;
+
+            try {
+                const response = await fetch(`/list_chassis_jsons?employee=${employee}&case_no=${caseNo}&date=${date}&folder=${folder}`);
+                const data = await response.json();
+
+                const select = document.getElementById('compLogFileSelect');
+                select.innerHTML = '<option value="">Select Log File</option>';
+
+                const grouped = data.grouped_files || {};
+                if (grouped[chassis]) {
+                    grouped[chassis].sort(naturalSort).forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file;
+                        option.textContent = file;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading comparison log files:', error);
+            }
+        }
+
+        // Log Loading Functions
+        async function loadPrimaryLog() {
+            const date = document.getElementById('dateSelect').value || currentDate;
+            const folder = document.getElementById('uploadFolderSelect').value;
+            const logFile = document.getElementById('logFileSelect').value;
+
+            if (!folder || !logFile) {
+                alert('Please select both folder and log file');
+                return;
+            }
+
+            document.getElementById('loadLogBtn').classList.add('loading');
+
+            try {
+                await loadLogData(date, folder, logFile, 'primary');
+            } finally {
+                document.getElementById('loadLogBtn').classList.remove('loading');
+            }
+        }
+
+        async function loadComparisonLog() {
+            const date = comparisonDate || currentDate;
+            const folder = comparisonFolder;
+            const logFile = document.getElementById('compLogFileSelect').value;
+
+            if (!folder || !logFile) {
+                alert('Please select both folder and log file');
+                return;
+            }
+
+            document.getElementById('compLoadLogBtn').classList.add('loading');
+
+            try {
+                await loadLogData(date, folder, logFile, 'comparison');
+            } finally {
+                document.getElementById('compLoadLogBtn').classList.remove('loading');
+            }
+        }
+
+        async function loadLogData(date, folder, logFile, type) {
+            try {
+                // Load all pages for the log file
+                const allPages = [];
+                let pageNum = 1;
+
+                while (true) {
+                    const filename = `${logFile}_pg${pageNum}.json`;
+                    const response = await fetch(`/load_json?employee=${employee}&case_no=${caseNo}&date=${date}&folder=${folder}&filename=${filename}`);
+
+                    if (!response.ok) break;
+
+                    const data = await response.json();
+
+                    // Add page and line info to each log entry
+                    data.logs.forEach((log, index) => {
+                        log._page = pageNum;
+                        log._line = index + 1;
+                    });
+
+                    allPages.push(...data.logs);
+                    pageNum++;
+                }
+
+                if (allPages.length === 0) {
+                    alert('No log data found');
+                    return;
+                }
+
+                // Process logs and update UI
+                if (type === 'primary') {
+                    allLogs = allPages;
+                    populateModuleSelect(allLogs, 'moduleSelect');
+                    applyFilters();
+                } else {
+                    comparisonLogs = allPages;
+                    populateModuleSelect(comparisonLogs, 'compModuleSelect');
+                    applyComparisonFilters();
+                }
+
+                updateStats();
+                updatePagination();
+
+            } catch (error) {
+                console.error('Error loading log data:', error);
+                alert('Error loading log data');
+            }
+        }
+
+        function populateModuleSelect(logs, selectId) {
+            const modules = [...new Set(logs.map(log => log.module))].sort();
+            const select = document.getElementById(selectId);
+
+            // Keep the "ALL MODULES" option
+            const allOption = select.querySelector('option[value=""]');
+            select.innerHTML = '';
+            select.appendChild(allOption);
+
+            modules.forEach(module => {
+                const option = document.createElement('option');
+                option.value = module;
+                option.textContent = module;
+                select.appendChild(option);
+            });
+        }
+
+        // Correct filtering logic based on sample
+        function applyFilters() {
+            const mod = document.getElementById('moduleSelect').value;
+            const keyword = document.getElementById('keywordInput').value.trim().toLowerCase();
+            const filters = [];
+
+            // Add main filter if module is selected or keyword is present
+            if ((mod && mod !== 'ALL MODULES') || keyword) {
+                filters.push({ module: mod, keyword: keyword });
+            }
+
+            // Add additional filters from pairs
+            document.querySelectorAll('#filterPairs .pair').forEach(pair => {
+                const m = pair.querySelector('select').value;
+                const k = pair.querySelector('input').value.trim().toLowerCase();
+                // Add filter if module is selected or keyword is present
+                if ((m && m !== 'ALL MODULES') || k) {
+                    filters.push({ module: m, keyword: k });
+                }
+            });
+
+            // Apply filters with OR logic between pairs
+            filteredLogs = filters.length === 0
+                ? [...allLogs]
+                : allLogs.filter(entry =>
+                    filters.some(f =>
+                        // If module is specified, match module, else ignore module
+                        ((f.module && f.module !== 'ALL MODULES') ? entry.module === f.module : true) &&
+                        (f.keyword === "" || entry.message.toLowerCase().includes(f.keyword))
+                    )
+                );
+
+            currentPage = 1;
+            updatePrimaryTable();
+            updateStats();
+            updatePagination();
+        }
+
+        function applyComparisonFilters() {
+            const mod = document.getElementById('compModuleSelect').value;
+            const keyword = document.getElementById('compKeywordInput').value.trim().toLowerCase();
+            const filters = [];
+
+            // Add main filter if module is selected or keyword is present
+            if ((mod && mod !== 'ALL MODULES') || keyword) {
+                filters.push({ module: mod, keyword: keyword });
+            }
+
+            // Add additional filters from pairs
+            document.querySelectorAll('#compFilterPairs .pair').forEach(pair => {
+                const m = pair.querySelector('select').value;
+                const k = pair.querySelector('input').value.trim().toLowerCase();
+                // Add filter if module is selected or keyword is present
+                if ((m && m !== 'ALL MODULES') || k) {
+                    filters.push({ module: m, keyword: k });
+                }
+            });
+
+            // Apply filters with OR logic between pairs
+            comparisonFilteredLogs = filters.length === 0
+                ? [...comparisonLogs]
+                : comparisonLogs.filter(entry =>
+                    filters.some(f =>
+                        // If module is specified, match module, else ignore module
+                        ((f.module && f.module !== 'ALL MODULES') ? entry.module === f.module : true) &&
+                        (f.keyword === "" || entry.message.toLowerCase().includes(f.keyword))
+                    )
+                );
+
+            updateComparisonTable();
+        }
+
+        function addFilter() {
+            const moduleSelect = document.getElementById('moduleSelect');
+            const pair = document.createElement('div');
+            pair.className = 'pair';
+
+            // Create module select with all options
+            const moduleOptions = [...moduleSelect.options]
+                .map(opt => `<option value="${opt.value}">${opt.textContent}</option>`)
+                .join('');
+
+            pair.innerHTML = `
+                <div class="form-group">
+                    <label>Module:</label>
+                    <select>${moduleOptions}</select>
+                </div>
+                <div class="form-group">
+                    <label>Keyword:</label>
+                    <input type="text" placeholder="Enter keyword..." />
+                </div>
+                <button class="remove-btn" onclick="removeFilter(this)">❌</button>
+            `;
+
+            document.getElementById('filterPairs').appendChild(pair);
+        }
+
+        function addComparisonFilter() {
+            const moduleSelect = document.getElementById('compModuleSelect');
+            const pair = document.createElement('div');
+            pair.className = 'pair';
+
+            // Create module select with all options
+            const moduleOptions = [...moduleSelect.options]
+                .map(opt => `<option value="${opt.value}">${opt.textContent}</option>`)
+                .join('');
+
+            pair.innerHTML = `
+                <div class="form-group">
+                    <label>Module:</label>
+                    <select>${moduleOptions}</select>
+                </div>
+                <div class="form-group">
+                    <label>Keyword:</label>
+                    <input type="text" placeholder="Enter keyword..." />
+                </div>
+                <button class="remove-btn" onclick="removeComparisonFilter(this)">❌</button>
+            `;
+
+            document.getElementById('compFilterPairs').appendChild(pair);
+        }
+
+        function removeFilter(button) {
+            button.parentElement.remove();
+            applyFilters();
+            syncFiltersToComparison();
+        }
+
+        function removeComparisonFilter(button) {
+            button.parentElement.remove();
+            applyComparisonFilters();
+        }
+
+        function resetFilters() {
+            document.getElementById('moduleSelect').value = '';
+            document.getElementById('keywordInput').value = '';
+            document.getElementById('filterPairs').innerHTML = '';
+            filteredLogs = [...allLogs];
+            currentPage = 1;
+            updatePrimaryTable();
+            updateStats();
+            updatePagination();
+            syncFiltersToComparison();
+        }
+
+        function resetComparisonFilters() {
+            document.getElementById('compModuleSelect').value = '';
+            document.getElementById('compKeywordInput').value = '';
+            document.getElementById('compFilterPairs').innerHTML = '';
+            comparisonFilteredLogs = [...comparisonLogs];
+            updateComparisonTable();
+        }
+
+        // Keyword highlighting for all active filters
+        function highlightKeyword(text, isComparison = false) {
+            const keywords = [];
+            const primaryKeywordId = isComparison ? 'compKeywordInput' : 'keywordInput';
+            const extraFiltersId = isComparison ? 'compFilterPairs' : 'filterPairs';
+
+            // Get primary keyword
+            const primary = document.getElementById(primaryKeywordId)?.value.trim().toLowerCase();
+            if (primary) keywords.push(primary);
+
+            // Get keywords from additional filters
+            document.querySelectorAll(`#${extraFiltersId} .pair input`).forEach(input => {
+                const val = input.value.trim().toLowerCase();
+                if (val) keywords.push(val);
+            });
+
+            if (keywords.length === 0) return text;
+
+            // Create regex pattern and highlight
+            const pattern = new RegExp(`(${keywords.join('|')})`, 'gi');
+            return text.replace(pattern, '<mark>$1</mark>');
+        }
+
+        // Table Update Functions
+        function updatePrimaryTable() {
+            const tbody = document.getElementById('primaryTableBody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredLogs.slice(startIndex, endIndex);
+
+            tbody.innerHTML = '';
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No logs found</td></tr>';
+                return;
+            }
+
+            pageData.forEach(log => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${log.timestamp}</td>
+                    <td>${log.switch}</td>
+                    <td>${log.module}</td>
+                    <td>${highlightKeyword(log.message, false)}</td>
+                    <td>Page ${log._page}, Line ${log._line}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateComparisonTable() {
+            const tbody = document.getElementById('comparisonTableBody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = comparisonFilteredLogs.slice(startIndex, endIndex);
+
+            tbody.innerHTML = '';
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No comparison logs found</td></tr>';
+                return;
+            }
+
+            pageData.forEach(log => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${log.timestamp}</td>
+                    <td>${log.switch}</td>
+                    <td>${log.module}</td>
+                    <td>${highlightKeyword(log.message, true)}</td>
+                    <td>Page ${log._page}, Line ${log._line}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalLogs').textContent = allLogs.length;
+            document.getElementById('filteredLogs').textContent = filteredLogs.length;
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = Math.ceil(filteredLogs.length / itemsPerPage);
+        }
+
+        function updatePagination() {
+            totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+
+            // Update page dropdown
+            const pageSelect = document.getElementById('pageSelect');
+            pageSelect.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                if (i === currentPage) option.selected = true;
+                pageSelect.appendChild(option);
+            }
+
+            // Update total pages display
+            document.getElementById('totalPageSpan').textContent = totalPages;
+
+            // Update button states
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+        }
+
+        // File Upload Functions
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileUpload');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file to upload');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            document.getElementById('uploadBtn').classList.add('loading');
+
+            try {
+                const response = await fetch(`/upload?employee=${employee}&case_no=${caseNo}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('File uploaded successfully');
+                    fileInput.value = '';
+
+                    // Auto-refresh dropdowns after successful upload
+                    await loadDates();
+
+                } else {
+                    alert('Upload failed: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload failed: ' + error.message);
+            } finally {
+                document.getElementById('uploadBtn').classList.remove('loading');
+            }
+        }
+
+        async function uploadComparisonFile() {
+            const fileInput = document.getElementById('compFileUpload');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file to upload');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            document.getElementById('compUploadBtn').classList.add('loading');
+
+            try {
+                const response = await fetch(`/upload?employee=${employee}&case_no=${caseNo}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Comparison file uploaded successfully');
+                    fileInput.value = '';
+
+                    // Auto-refresh comparison dropdowns after successful upload
+                    await loadComparisonDates();
+
+                } else {
+                    alert('Upload failed: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload failed: ' + error.message);
+            } finally {
+                document.getElementById('compUploadBtn').classList.remove('loading');
+            }
+        }
+
+        // Utility Functions
+        async function cleanupLogs() {
+            if (!confirm('Are you sure you want to cleanup all logs and return to login? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/cleanup_now?employee=${employee}&case_no=${caseNo}`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Logs cleaned up successfully');
+
+                    // Clear localStorage to force fresh login
+                    ['case_no', 'date', 'upload_folder'].forEach(k => localStorage.removeItem(k));
+
+                    // Redirect to login
+                    window.location.href = 'login.html';
+                } else {
+                    alert('Cleanup failed');
+                }
+            } catch (error) {
+                console.error('Cleanup error:', error);
+                alert('Cleanup failed: ' + error.message);
+            }
+        }
+
+        function switchUser() {
+            if (confirm('Are you sure you want to switch user? Any unsaved changes will be lost.')) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        function exportLogs() {
+            if (filteredLogs.length === 0) {
+                alert('No logs to export');
+                return;
+            }
+
+            const csvContent = convertToCSV(filteredLogs);
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `logs_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportComparisonLogs() {
+            if (comparisonFilteredLogs.length === 0) {
+                alert('No comparison logs to export');
+                return;
+            }
+
+            const csvContent = convertToCSV(comparisonFilteredLogs);
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `comparison_logs_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function convertToCSV(logs) {
+            const headers = ['Timestamp', 'Switch', 'Module', 'Message', 'Location'];
+            const csvRows = [headers.join(',')];
+
+            logs.forEach(log => {
+                const row = [
+                    `"${log.timestamp}"`,
+                    `"${log.switch}"`,
+                    `"${log.module}"`,
+                    `"${log.message.replace(/"/g, '""')}"`,
+                    `"Page ${log._page}, Line ${log._line}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            return csvRows.join('\n');
+        }
+
+        // Refresh functions
+        function refreshTable() {
+            applyFilters();
+            updateStats();
+            updatePagination();
+        }
+
+        function refreshComparisonTable() {
+            applyComparisonFilters();
+        }
+        document.getElementById("btn-hmon").addEventListener("click", () => {
+            window.location.href = "./dynamic_hmon_dashboard.html";
+        });
+    </script>
+</body>
+
+</html>
