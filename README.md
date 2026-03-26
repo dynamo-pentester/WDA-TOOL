@@ -29,15 +29,6 @@ It bridges the gap between:
 
 ---
 
-## 🏗️ Architecture
-├── backend/ # FastAPI backend, parsing logic, insight engine
-├── frontend/ # UI (HTML/JS / React optional)
-├── reports/ # Report generation (HTML → PDF)
-├── uploaded/ # Uploaded tech_support bundles
-
-
----
-
 ## 🔧 Features
 
 ### 📂 Log Processing
