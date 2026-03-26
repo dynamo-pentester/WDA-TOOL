@@ -1,12 +1,99 @@
-# Wired Log Analyzer Tool
+# ⚡ Wired Log Analyzer — Intelligent Tech Support Log Analysis Platform
 
-This tool helps support engineers upload and analyze Alcatel-Lucent tech_support bundles, extract smart insights, and generate structured reports.
+Wired Log Analyzer is a **security-focused log analysis platform** designed to process and extract insights from Alcatel-Lucent Enterprise (ALE) tech_support bundles.
 
-## Structure
-- `backend/`: Parsing logic, insights, backend APIs
-- `frontend/`: HTML/JS interface (React optional)
-- `reports/`: Report generation using HTML-to-PDF
-- `uploaded/`: Uploaded .tar bundles for analysis
+Built to assist support engineers in **real production environments**, the system automates log parsing, correlation, and insight generation across large-scale datasets.
+
+---
+
+## 🚀 Key Highlights
+
+- 📦 Parses complex `.tar` tech_support bundles
+- 🔍 Extracts and structures logs into analyzable formats
+- ⚡ Handles multi-GB datasets efficiently
+- 🧠 Generates intelligent insights from raw logs
+- 📊 Interactive visualization for faster debugging
+- 📄 Automated report generation (HTML → PDF)
+
+---
+
+## 🧠 Core Idea
+
+Instead of manually digging through thousands of log lines, this tool:
+
+> Transforms raw infrastructure logs into structured, actionable insights.
+
+It bridges the gap between:
+- **Raw system logs**
+- **SOC / support engineer workflows**
+
+---
+
+## 🏗️ Architecture
+├── backend/ # FastAPI backend, parsing logic, insight engine
+├── frontend/ # UI (HTML/JS / React optional)
+├── reports/ # Report generation (HTML → PDF)
+├── uploaded/ # Uploaded tech_support bundles
+
+
+---
+
+## 🔧 Features
+
+### 📂 Log Processing
+- Extracts `.tar` bundles
+- Parses tech_support logs
+- Handles HMON datasets and structured outputs
+
+### 📊 Visualization
+- Interactive dashboards for log exploration
+- Time-series analysis for system metrics
+
+### 🧠 Insight Generation
+- Log correlation and anomaly detection
+- Structured summaries for faster triage
+
+### 📄 Reporting
+- Generates clean, shareable reports
+- HTML → PDF export support
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend:** FastAPI (Python)
+- **Frontend:** HTML, JavaScript (React optional)
+- **Data Processing:** Python, Pandas
+- **Visualization:** Plotly
+- **Deployment/Env:** Linux, Docker (optional)
+
+---
+
+## ▶️ Getting Started
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-username/wired-log-analyzer.git
+cd wired-log-analyzer
+
+```
+2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+4. Run backend
+```bash
+uvicorn main:app --reload
+```
+
+6. Run frontend
+
+Serve via:
+
+Static HTML server
+OR React dev server
+
+📸 Screenshots: 
 
 <img width="1919" height="969" alt="Screenshot 2025-12-28 215047" src="https://github.com/user-attachments/assets/f491de1e-62c2-4180-a41f-3e641e6f7bcd" />
 <img width="1919" height="970" alt="Screenshot 2025-12-28 215352" src="https://github.com/user-attachments/assets/42d34d8d-2f9c-4331-9c6e-535da4942e58" />
